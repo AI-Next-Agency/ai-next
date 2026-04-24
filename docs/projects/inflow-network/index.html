@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INFLOW Network - AI Readiness Assessment</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #ff6b35;
+            --secondary: #f7931e;
+            --accent: #004e89;
+            --light-bg: #f5f5f5;
+            --text-dark: #1a1a1a;
+            --text-light: #666;
+            --border: #ddd;
+            --success: #4caf50;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text-dark);
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.95;
+            line-height: 1.5;
+        }
+
+        .progress-bar {
+            background: rgba(255,255,255,0.3);
+            height: 4px;
+            margin-top: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: white;
+            transition: width 0.3s ease;
+        }
+
+        .form-content {
+            padding: 40px 30px;
+        }
+
+        .step {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .step-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .step-number {
+            background: var(--primary);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 10px;
+            color: var(--text-dark);
+            font-size: 14px;
+        }
+
+        .required {
+            color: var(--primary);
+        }
+
+        input[type="text"],
+        input[type="email"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+        }
+
+        .radio-group,
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .radio-option,
+        .checkbox-option {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .radio-option:hover,
+        .checkbox-option:hover {
+            border-color: var(--primary);
+            background: rgba(255, 107, 53, 0.05);
+        }
+
+        input[type="radio"],
+        input[type="checkbox"] {
+            margin-right: 12px;
+            margin-top: 2px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .option-text {
+            flex: 1;
+        }
+
+        .option-text strong {
+            display: block;
+            color: var(--text-dark);
+            margin-bottom: 2px;
+        }
+
+        .option-text .context {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .context-box {
+            background: rgba(4, 78, 137, 0.05);
+            border-left: 4px solid var(--accent);
+            padding: 12px 15px;
+            margin-top: 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: var(--text-light);
+            line-height: 1.5;
+        }
+
+        .context-box strong {
+            color: var(--accent);
+        }
+
+        .error {
+            color: #d32f2f;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .success-message {
+            background: rgba(76, 175, 80, 0.1);
+            border-left: 4px solid var(--success);
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            color: #2e7d32;
+            font-size: 13px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: space-between;
+            margin-top: 35px;
+            padding-top: 25px;
+            border-top: 2px solid var(--light-bg);
+        }
+
+        button {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary {
+            background: var(--light-bg);
+            color: var(--text-dark);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #e0e0e0;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .success-screen {
+            text-align: center;
+            padding: 60px 30px;
+        }
+
+        .success-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .success-screen h2 {
+            font-size: 24px;
+            color: var(--accent);
+            margin-bottom: 15px;
+        }
+
+        .success-screen p {
+            color: var(--text-light);
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border);
+            cursor: pointer;
+        }
+
+        .dot.active {
+            background: var(--primary);
+        }
+
+        .dot.completed {
+            background: var(--success);
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .form-content {
+                padding: 25px 20px;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>INFLOW Network</h1>
+            <p>AI Readiness & Capabilities Assessment</p>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <div class="form-content">
+            <div class="step-indicator" id="stepIndicator"></div>
+
+            <!-- Step 1: Contact Information -->
+            <div class="step active">
+                <div class="step-title">
+                    <span class="step-number">1</span>
+                    <span>Your Contact Information</span>
+                </div>
+                <form id="contactForm">
+                    <div class="form-group">
+                        <label for="name">Full Name <span class="required">*</span></label>
+                        <input type="text" id="name" name="name" required placeholder="Your full name">
+                        <div class="error" id="nameError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address <span class="required">*</span></label>
+                        <input type="email" id="email" name="email" required placeholder="your.email@company.com">
+                        <div class="error" id="emailError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="department">Department <span class="required">*</span></label>
+                        <input type="text" id="department" name="department" required placeholder="e.g., Product, Engineering, Operations">
+                        <div class="error" id="departmentError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="role">Role / Title <span class="required">*</span></label>
+                        <input type="text" id="role" name="role" required placeholder="e.g., Product Manager, Engineer">
+                        <div class="error" id="roleError"></div>
+                    </div>
+
+                    <div class="context-box">
+                        <strong>What happens next:</strong> Your responses will help us understand INFLOW Network's AI maturity and create a customized roadmap for AI capabilities that fit your business model and goals.
+                    </div>
+                </form>
+            </div>
+
+            <!-- Step 2: Creator Matching & Discovery -->
+            <div class="step">
+                <div class="step-title">
+                    <span class="step-number">2</span>
+                    <span>Creator Discovery & Matching</span>
+                </div>
+                <div class="form-group">
+                    <label>How do brands currently discover and select creators for campaigns?</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="q1" value="1" required>
+                            <div class="option-text">
+                                <strong>Manual keyword search</strong>
+                                <span class="context">Brands search by name or keywords; no intelligent filtering</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q1" value="2">
+                            <div class="option-text">
+                                <strong>Basic filtering available</strong>
+                                <span class="context">Category, follower count, location - but matching is manual</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q1" value="3">
+                            <div class="option-text">
+                                <strong>Keyword-based recommendations</strong>
+                                <span class="context">Keyword searching plus sorting by basic metrics</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q1" value="4">
+                            <div class="option-text">
+                                <strong>Smart matching suggestions</strong>
+                                <span class="context">Suggestions based on campaign requirements and creator attributes</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q1" value="5">
+                            <div class="option-text">
+                                <strong>AI-powered recommendations</strong>
+                                <span class="context">ML learning from successful brand-creator pairings</span>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="context-box">
+                        <strong>Why this matters:</strong> Creator discovery is the core value proposition. Better matching means faster deal closure and higher campaign success rates.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Marketplace Data Integration -->
+            <div class="step">
+                <div class="step-title">
+                    <span class="step-number">3</span>
+                    <span>Marketplace Data & Analytics</span>
+                </div>
+                <div class="form-group">
+                    <label>How well integrated is creator data (profiles, campaigns, engagement metrics)?</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="q2" value="1" required>
+                            <div class="option-text">
+                                <strong>Scattered data</strong>
+                                <span class="context">Much information is manual or not stored</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q2" value="2">
+                            <div class="option-text">
+                                <strong>Basic profiles exist</strong>
+                                <span class="context">Campaign history and metrics are incomplete</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q2" value="3">
+                            <div class="option-text">
+                                <strong>Integrated with dashboards</strong>
+                                <span class="context">Profiles and campaign data integrated; basic dashboards exist</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q2" value="4">
+                            <div class="option-text">
+                                <strong>Rich with analytics</strong>
+                                <span class="context">Campaign history, engagement analysis, performance metrics</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q2" value="5">
+                            <div class="option-text">
+                                <strong>ML-ready intelligence system</strong>
+                                <span class="context">Unified data with real-time metrics, trends, and ML-ready datasets</span>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="context-box">
+                        <strong>Why this matters:</strong> Integrated data is the foundation for AI/ML (matching, fraud detection, predictions). Better integration means faster algorithms and time to value.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Campaign Management -->
+            <div class="step">
+                <div class="step-title">
+                    <span class="step-number">4</span>
+                    <span>Campaign Management & Tracking</span>
+                </div>
+                <div class="form-group">
+                    <label>How comprehensive is your campaign management and performance tracking?</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="q3" value="1" required>
+                            <div class="option-text">
+                                <strong>Mostly manual</strong>
+                                <span class="context">Limited tracking of performance</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q3" value="2">
+                            <div class="option-text">
+                                <strong>Basic tracking</strong>
+                                <span class="context">Start date, budget, status tracked; limited metrics</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q3" value="3">
+                            <div class="option-text">
+                                <strong>Tracked with metrics</strong>
+                                <span class="context">Engagement metrics collected, but no comparative analysis</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q3" value="4">
+                            <div class="option-text">
+                                <strong>Comprehensive management</strong>
+                                <span class="context">Performance dashboards and ROI calculations available</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q3" value="5">
+                            <div class="option-text">
+                                <strong>Advanced with predictions</strong>
+                                <span class="context">Orchestration with predictive analytics and recommendations</span>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="context-box">
+                        <strong>Why this matters:</strong> Campaign data enables AI-powered insights and optimization. Better tracking improves brand satisfaction and platforms margins.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5: Fraud Detection & Creator Verification -->
+            <div class="step">
+                <div class="step-title">
+                    <span class="step-number">5</span>
+                    <span>Fraud Detection & Trust</span>
+                </div>
+                <div class="form-group">
+                    <label>How do you currently approach fraud detection and creator verification?</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="q4" value="1" required>
+                            <div class="option-text">
+                                <strong>No formal process</strong>
+                                <span class="context">Creators trusted based on follower count and profile</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q4" value="2">
+                            <div class="option-text">
+                                <strong>Manual review only</strong>
+                                <span class="context">Suspicious creators reviewed manually; limited checks</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q4" value="3">
+                            <div class="option-text">
+                                <strong>Basic automated checks</strong>
+                                <span class="context">Account age, posting frequency checked; manual review continues</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q4" value="4">
+                            <div class="option-text">
+                                <strong>Automated detection</strong>
+                                <span class="context">Fake followers and bot engagement detected with verification badges</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q4" value="5">
+                            <div class="option-text">
+                                <strong>Advanced behavioral analysis</strong>
+                                <span class="context">Multi-layer fraud detection with behavioral signals and trust scoring</span>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="context-box">
+                        <strong>Why this matters:</strong> Fraud detection protects brand trust and platform reputation. AI-powered verification is a major competitive differentiator.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 6: Creator Insights & Analytics -->
+            <div class="step">
+                <div class="step-title">
+                    <span class="step-number">6</span>
+                    <span>Creator Insights & Intelligence</span>
+                </div>
+                <div class="form-group">
+                    <label>What level of analytics and insights do you provide to creators?</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="q5" value="1" required>
+                            <div class="option-text">
+                                <strong>No analytics provided</strong>
+                                <span class="context">Creators rely on platform native insights (Instagram, TikTok)</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q5" value="2">
+                            <div class="option-text">
+                                <strong>Basic dashboards</strong>
+                                <span class="context">Follower count and post engagement shown</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q5" value="3">
+                            <div class="option-text">
+                                <strong>Performance insights</strong>
+                                <span class="context">Engagement rates, growth trends, audience insights available</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q5" value="4">
+                            <div class="option-text">
+                                <strong>Advanced analytics</strong>
+                                <span class="context">Content performance breakdown and campaign ROI analysis</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q5" value="5">
+                            <div class="option-text">
+                                <strong>AI-powered recommendations</strong>
+                                <span class="context">Growth predictions, peer benchmarking, and recommendations</span>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="context-box">
+                        <strong>Why this matters:</strong> Creator insights drive INFLOW Academy adoption, increase retention, and differentiate from larger platforms.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 7: Trend & Content Intelligence -->
+            <div class="step">
+                <div class="step-title">
+                    <span class="step-number">7</span>
+                    <span>Trend & Content Intelligence</span>
+                </div>
+                <div class="form-group">
+                    <label>How do creators and brands discover emerging trends and content opportunities?</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="q6" value="1" required>
+                            <div class="option-text">
+                                <strong>No formal tracking</strong>
+                                <span class="context">Users rely on platform native trends</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q6" value="2">
+                            <div class="option-text">
+                                <strong>Manual trend lists</strong>
+                                <span class="context">Trends maintained manually; updates infrequent</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q6" value="3">
+                            <div class="option-text">
+                                <strong>Periodic trend reports</strong>
+                                <span class="context">Basic tracking of emerging content types and formats</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q6" value="4">
+                            <div class="option-text">
+                                <strong>Real-time dashboards</strong>
+                                <span class="context">Emerging hashtags and content formats shown live</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q6" value="5">
+                            <div class="option-text">
+                                <strong>AI trend detection</strong>
+                                <span class="context">Emerging trends and creator identification with growth predictions</span>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="context-box">
+                        <strong>Why this matters:</strong> Trend intelligence enables early-mover advantage. AI detection can become a valuable product and drive engagement.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 8: Event Data & Analytics -->
+            <div class="step">
+                <div class="step-title">
+                    <span class="step-number">8</span>
+                    <span>Event Analytics & Optimization</span>
+                </div>
+                <div class="form-group">
+                    <label>How do you analyze INFLOW Summit and event data for insights?</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="q7" value="1" required>
+                            <div class="option-text">
+                                <strong>Tracked manually</strong>
+                                <span class="context">Limited analysis or insights generated</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q7" value="2">
+                            <div class="option-text">
+                                <strong>Basic metrics tracked</strong>
+                                <span class="context">Attendance and sponsorships measured; limited analysis</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q7" value="3">
+                            <div class="option-text">
+                                <strong>Event dashboards</strong>
+                                <span class="context">Attendance, engagement, and sponsorship ROI tracked</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q7" value="4">
+                            <div class="option-text">
+                                <strong>Advanced analysis</strong>
+                                <span class="context">Networking patterns and ROI by sponsorship type analyzed</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q7" value="5">
+                            <div class="option-text">
+                                <strong>Predictive recommendations</strong>
+                                <span class="context">Event optimization and attendee connection recommendations</span>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="context-box">
+                        <strong>Why this matters:</strong> Event data optimization increases sponsorship ROI and improves future event design.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 9: Business Intelligence & Forecasting -->
+            <div class="step">
+                <div class="step-title">
+                    <span class="step-number">9</span>
+                    <span>Business Intelligence</span>
+                </div>
+                <div class="form-group">
+                    <label>How do you currently forecast platform growth, revenue, and user behavior?</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="q8" value="1" required>
+                            <div class="option-text">
+                                <strong>Ad-hoc forecasting</strong>
+                                <span class="context">Forecasting based on informal projections</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q8" value="2">
+                            <div class="option-text">
+                                <strong>Basic trend analysis</strong>
+                                <span class="context">Historical trend analysis for revenue and growth</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q8" value="3">
+                            <div class="option-text">
+                                <strong>Structured models</strong>
+                                <span class="context">Linear or simple time-series models updated quarterly</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q8" value="4">
+                            <div class="option-text">
+                                <strong>Advanced forecasting</strong>
+                                <span class="context">Multiple scenarios and sensitivity analysis available</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q8" value="5">
+                            <div class="option-text">
+                                <strong>Predictive models</strong>
+                                <span class="context">ML models for behavior, churn, and lifetime value</span>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="context-box">
+                        <strong>Why this matters:</strong> Better forecasting enables smarter resource allocation, pricing, and strategic planning.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 10: Team ML Expertise -->
+            <div class="step">
+                <div class="step-title">
+                    <span class="step-number">10</span>
+                    <span>Team Capabilities</span>
+                </div>
+                <div class="form-group">
+                    <label>What is your team's current ML, data science, and analytics experience?</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="q9" value="1" required>
+                            <div class="option-text">
+                                <strong>No ML expertise</strong>
+                                <span class="context">No team members with ML/data science background</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q9" value="2">
+                            <div class="option-text">
+                                <strong>Basic analytics skills</strong>
+                                <span class="context">1-2 team members with SQL, Python, or Excel skills</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q9" value="3">
+                            <div class="option-text">
+                                <strong>Multiple data people</strong>
+                                <span class="context">3-4 with data background; basic ML familiarity</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q9" value="4">
+                            <div class="option-text">
+                                <strong>Junior data scientist</strong>
+                                <span class="context">Dedicated analyst or junior data scientist on team</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q9" value="5">
+                            <div class="option-text">
+                                <strong>Experienced ML team</strong>
+                                <span class="context">Experienced team with production ML deployments</span>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="context-box">
+                        <strong>Why this matters:</strong> Team expertise determines training needs, hiring urgency, and realistic timelines.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 11: Data Infrastructure -->
+            <div class="step">
+                <div class="step-title">
+                    <span class="step-number">11</span>
+                    <span>Data Infrastructure</span>
+                </div>
+                <div class="form-group">
+                    <label>How mature is your data infrastructure for analytics and ML?</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="q10" value="1" required>
+                            <div class="option-text">
+                                <strong>No data warehouse</strong>
+                                <span class="context">No structured data pipeline exists</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q10" value="2">
+                            <div class="option-text">
+                                <strong>Basic logging</strong>
+                                <span class="context">Limited ability to query for analytics</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q10" value="3">
+                            <div class="option-text">
+                                <strong>Data warehouse exists</strong>
+                                <span class="context">Analytics database with ETL pipelines for key datasets</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q10" value="4">
+                            <div class="option-text">
+                                <strong>Comprehensive infrastructure</strong>
+                                <span class="context">Automated pipelines and analytics tools</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q10" value="5">
+                            <div class="option-text">
+                                <strong>Advanced ML-ready platform</strong>
+                                <span class="context">Feature store, real-time processing, ML-ready datasets</span>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="context-box">
+                        <strong>Why this matters:</strong> Data infrastructure is the foundation for all AI/ML work. This determines development speed and capability.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 12: AI Strategy & Leadership Commitment -->
+            <div class="step">
+                <div class="step-title">
+                    <span class="step-number">12</span>
+                    <span>AI Strategy & Commitment</span>
+                </div>
+                <div class="form-group">
+                    <label>How committed is leadership to building AI as a strategic priority?</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="q11" value="1" required>
+                            <div class="option-text">
+                                <strong>Not a priority</strong>
+                                <span class="context">No budget or plan for AI initiatives</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q11" value="2">
+                            <div class="option-text">
+                                <strong>Interest only</strong>
+                                <span class="context">Interest in AI but no formal strategy</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q11" value="3">
+                            <div class="option-text">
+                                <strong>Early strategy</strong>
+                                <span class="context">Budget allocated; early-stage strategy development</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q11" value="4">
+                            <div class="option-text">
+                                <strong>Clear strategy & resources</strong>
+                                <span class="context">Clear roadmap; dedicated resources and team ownership</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="q11" value="5">
+                            <div class="option-text">
+                                <strong>Strategic priority</strong>
+                                <span class="context">AI central to strategy; significant investment; C-level accountability</span>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="context-box">
+                        <strong>Why this matters:</strong> Leadership commitment determines resource availability and long-term success.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 13: Success Screen -->
+            <div class="step success-screen">
+                <div class="success-icon">✓</div>
+                <h2>Thank You!</h2>
+                <p>Your assessment responses have been received.</p>
+                <p>We'll analyze your results and reach out within 2 business days with:</p>
+                <ul style="text-align: left; display: inline-block; color: var(--text-light);">
+                    <li style="margin-bottom: 10px;">AI Maturity Score</li>
+                    <li style="margin-bottom: 10px;">Dimension breakdown and key gaps</li>
+                    <li style="margin-bottom: 10px;">12-month curriculum recommendations</li>
+                    <li>Investment estimate and ROI timeline</li>
+                </ul>
+            </div>
+
+            <!-- Navigation -->
+            <div class="buttons">
+                <button class="btn-secondary" id="prevBtn" onclick="changeStep(-1)">← Back</button>
+                <button class="btn-primary" id="nextBtn" onclick="changeStep(1)">Next →</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const totalSteps = 13;
+        let currentStep = 1;
+        const responses = {};
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            createStepIndicators();
+            updateStepDisplay();
+            loadResponses();
+        });
+
+        function createStepIndicators() {
+            const indicator = document.getElementById('stepIndicator');
+            for (let i = 1; i < totalSteps; i++) {
+                const dot = document.createElement('div');
+                dot.className = `dot${i === 1 ? ' active' : ''}`;
+                dot.onclick = () => goToStep(i);
+                indicator.appendChild(dot);
+            }
+        }
+
+        function changeStep(n) {
+            const form = document.getElementById('contactForm');
+            if (currentStep === 1 && n > 0) {
+                if (!validateStep()) return;
+            }
+
+            let newStep = currentStep + n;
+            if (newStep < 1) newStep = 1;
+            if (newStep > totalSteps) newStep = totalSteps;
+
+            goToStep(newStep);
+        }
+
+        function goToStep(n) {
+            if (n < 1 || n > totalSteps) return;
+
+            // Save current responses
+            const inputs = document.querySelectorAll('[name^="q"], [name^="name"], [name^="email"], [name^="department"], [name^="role"]');
+            inputs.forEach(input => {
+                if (input.type === 'radio' || input.type === 'checkbox') {
+                    if (input.checked) responses[input.name] = input.value;
+                } else {
+                    responses[input.name] = input.value;
+                }
+            });
+
+            currentStep = n;
+            updateStepDisplay();
+        }
+
+        function updateStepDisplay() {
+            // Update visible step
+            const steps = document.querySelectorAll('.step');
+            steps.forEach(step => step.classList.remove('active'));
+            if (currentStep <= totalSteps) {
+                steps[currentStep - 1].classList.add('active');
+            }
+
+            // Update progress bar
+            const progress = ((currentStep - 1) / (totalSteps - 1)) * 100;
+            document.querySelector('.progress-fill').style.width = progress + '%';
+
+            // Update step indicators
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((dot, index) => {
+                dot.classList.remove('active', 'completed');
+                if (index + 1 < currentStep) {
+                    dot.classList.add('completed');
+                } else if (index + 1 === currentStep) {
+                    dot.classList.add('active');
+                }
+            });
+
+            // Update buttons
+            document.getElementById('prevBtn').style.display = currentStep === 1 ? 'none' : 'block';
+            if (currentStep === totalSteps) {
+                document.getElementById('nextBtn').textContent = 'Submit';
+                document.getElementById('nextBtn').onclick = () => submitForm();
+            } else {
+                document.getElementById('nextBtn').textContent = 'Next →';
+                document.getElementById('nextBtn').onclick = () => changeStep(1);
+            }
+
+            // Restore values
+            Object.keys(responses).forEach(key => {
+                const input = document.querySelector(`[name="${key}"]`);
+                if (input) {
+                    if (input.type === 'radio' || input.type === 'checkbox') {
+                        if (input.value === responses[key]) input.checked = true;
+                    } else {
+                        input.value = responses[key];
+                    }
+                }
+            });
+        }
+
+        function validateStep() {
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const department = document.getElementById('department').value.trim();
+            const role = document.getElementById('role').value.trim();
+
+            let valid = true;
+            document.getElementById('nameError').textContent = '';
+            document.getElementById('emailError').textContent = '';
+            document.getElementById('departmentError').textContent = '';
+            document.getElementById('roleError').textContent = '';
+
+            if (!name) {
+                document.getElementById('nameError').textContent = 'Name is required';
+                valid = false;
+            }
+            if (!email) {
+                document.getElementById('emailError').textContent = 'Email is required';
+                valid = false;
+            } else if (!email.includes('@')) {
+                document.getElementById('emailError').textContent = 'Valid email required';
+                valid = false;
+            }
+            if (!department) {
+                document.getElementById('departmentError').textContent = 'Department is required';
+                valid = false;
+            }
+            if (!role) {
+                document.getElementById('roleError').textContent = 'Role is required';
+                valid = false;
+            }
+
+            return valid;
+        }
+
+        function submitForm() {
+            // Save all responses
+            const inputs = document.querySelectorAll('[name^="q"], [name^="name"], [name^="email"], [name^="department"], [name^="role"]');
+            inputs.forEach(input => {
+                if (input.type === 'radio' || input.type === 'checkbox') {
+                    if (input.checked) responses[input.name] = input.value;
+                } else {
+                    responses[input.name] = input.value;
+                }
+            });
+
+            // Create issue payload
+            const payload = {
+                title: `INFLOW Network Assessment - ${responses.name}`,
+                body: generateIssueBody(),
+                labels: ['inflow-assessment', 'ai-readiness']
+            };
+
+            // Save to localStorage as backup
+            localStorage.setItem('inflow_assessment', JSON.stringify(responses));
+
+            // Create GitHub issue (you would need to implement this with a backend)
+            console.log('Assessment submitted:', responses);
+            goToStep(totalSteps);
+        }
+
+        function generateIssueBody() {
+            return `## Assessment Response
+
+**Name**: ${responses.name}
+**Email**: ${responses.email}
+**Department**: ${responses.department}
+**Role**: ${responses.role}
+
+### Scores
+- Q1 (Creator Matching): ${responses.q1}
+- Q2 (Data Integration): ${responses.q2}
+- Q3 (Campaign Management): ${responses.q3}
+- Q4 (Fraud Detection): ${responses.q4}
+- Q5 (Creator Insights): ${responses.q5}
+- Q6 (Trend Intelligence): ${responses.q6}
+- Q7 (Event Analytics): ${responses.q7}
+- Q8 (Business Intelligence): ${responses.q8}
+- Q9 (Team Capabilities): ${responses.q9}
+- Q10 (Data Infrastructure): ${responses.q10}
+- Q11 (AI Strategy): ${responses.q11}
+
+**Submitted**: ${new Date().toISOString()}`;
+        }
+
+        function loadResponses() {
+            const saved = localStorage.getItem('inflow_assessment');
+            if (saved) {
+                Object.assign(responses, JSON.parse(saved));
+            }
+        }
+    </script>
+</body>
+</html>
