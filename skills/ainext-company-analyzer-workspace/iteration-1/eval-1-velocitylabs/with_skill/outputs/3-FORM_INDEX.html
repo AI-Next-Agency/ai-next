@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Velocity Labs - AI Readiness Assessment</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #ffffff;
+            --surface: #f9fafb;
+            --border: #e5e7eb;
+            --text: #111827;
+            --text-light: #6b7280;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--bg);
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .progress-container {
+            background: var(--surface);
+            padding: 20px 30px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--success));
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            color: var(--text-light);
+            text-align: right;
+        }
+
+        .form-container {
+            padding: 40px 30px;
+        }
+
+        .form-section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .form-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .section-subtitle {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 32px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .input-field::placeholder {
+            color: var(--text-light);
+        }
+
+        .question-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            position: relative;
+            padding: 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--bg);
+        }
+
+        .option:hover {
+            border-color: var(--primary);
+            background: rgba(37, 99, 235, 0.02);
+        }
+
+        .option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+
+        .option input[type="radio"]:checked + label {
+            color: var(--primary);
+        }
+
+        .option input[type="radio"]:checked {
+            background: var(--primary);
+        }
+
+        .option.selected {
+            border-color: var(--primary);
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        .option label {
+            display: block;
+            margin: 0;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 400;
+        }
+
+        .option-score {
+            font-size: 13px;
+            color: var(--text-light);
+            margin-top: 4px;
+            margin-left: 24px;
+        }
+
+        .context-box {
+            background: var(--surface);
+            border-left: 4px solid var(--primary);
+            padding: 16px;
+            border-radius: 6px;
+            margin-top: 16px;
+            font-size: 14px;
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        .context-label {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 40px;
+            justify-content: space-between;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2);
+        }
+
+        .btn-primary:disabled {
+            background: var(--text-light);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .form-validation {
+            color: var(--danger);
+            font-size: 13px;
+            margin-top: 6px;
+            display: none;
+        }
+
+        .form-validation.show {
+            display: block;
+        }
+
+        .success-screen {
+            display: none;
+            text-align: center;
+            padding: 60px 30px;
+        }
+
+        .success-screen.active {
+            display: block;
+        }
+
+        .success-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .success-screen h2 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--success);
+        }
+
+        .success-screen p {
+            font-size: 16px;
+            color: var(--text-light);
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .email-confirmation {
+            background: var(--surface);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .email-confirmation p {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .email-confirmation strong {
+            color: var(--text);
+        }
+
+        .footer {
+            background: var(--surface);
+            padding: 20px 30px;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            font-size: 13px;
+            color: var(--text-light);
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .form-container {
+                padding: 30px 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>AI Readiness Assessment</h1>
+            <p>Velocity Labs</p>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text">
+                <span id="currentStep">1</span> / <span id="totalSteps">12</span>
+            </div>
+        </div>
+
+        <div class="form-container">
+            <!-- Section 1: Contact Information -->
+            <div class="form-section active" data-section="0">
+                <h2 class="section-title">Let's Get Started</h2>
+                <p class="section-subtitle">Tell us a bit about yourself and your role</p>
+
+                <form id="contactForm">
+                    <div class="form-group">
+                        <label for="fullName">Full Name</label>
+                        <input type="text" id="fullName" class="input-field" placeholder="John Smith" required>
+                        <div class="form-validation"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" class="input-field" placeholder="john@velocitylabs.io" required>
+                        <div class="form-validation"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="department">Department</label>
+                        <input type="text" id="department" class="input-field" placeholder="e.g., Engineering, Product, Executive" required>
+                        <div class="form-validation"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="role">Your Role</label>
+                        <input type="text" id="role" class="input-field" placeholder="e.g., Backend Engineer, Product Manager, CTO" required>
+                        <div class="form-validation"></div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Section 2: Question 1 -->
+            <div class="form-section" data-section="1">
+                <h2 class="section-title">Tech Stack & Infrastructure</h2>
+                <p class="section-subtitle">Questions 1-3 of 11</p>
+
+                <div class="form-group">
+                    <label>Q1: Backend ML Integration Readiness</label>
+                    <p class="section-subtitle" style="margin-bottom: 16px;">Your backend is currently built on Node.js. Regarding ML model integration and serving capabilities, where are you today?</p>
+
+                    <div class="question-options">
+                        <div class="option" onclick="selectOption(this, 'q1', 1)">
+                            <input type="radio" name="q1" value="1">
+                            <label>We haven't considered integrating ML models into Node.js; our architecture focuses purely on business logic</label>
+                        </div>
+                        <div class="option" onclick="selectOption(this, 'q1', 2)">
+                            <input type="radio" name="q1" value="2">
+                            <label>We're exploring ML possibilities but haven't determined if/how to integrate with Node.js backend</label>
+                        </div>
+                        <div class="option" onclick="selectOption(this, 'q1', 3)">
+                            <input type="radio" name="q1" value="3">
+                            <label>We have basic ML integration (perhaps TensorFlow.js) for lightweight predictions, working in a non-critical service</label>
+                        </div>
+                        <div class="option" onclick="selectOption(this, 'q1', 4)">
+                            <input type="radio" name="q1" value="4">
+                            <label>We have a production ML inference service in Node.js with monitoring and performance optimization</label>
+                        </div>
+                        <div class="option" onclick="selectOption(this, 'q1', 5)">
+                            <input type="radio" name="q1" value="5">
+                            <label>We have a mature ML serving infrastructure supporting multiple models with A/B testing and real-time feature engineering</label>
+                        </div>
+                    </div>
+
+                    <div class="context-box">
+                        <div class="context-label">Why this matters:</div>
+                        Your Node.js backend is ideal for serving ML predictions in real-time to your frontend. Understanding your readiness here helps us design the right architecture for AI features.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: Question 2 -->
+            <div class="form-section" data-section="2">
+                <h2 class="section-title">Tech Stack & Infrastructure</h2>
+                <p class="section-subtitle">Question 2 of 11</p>
+
+                <div class="form-group">
+                    <label>Q2: Data Pipeline & Analytics Infrastructure</label>
+                    <p class="section-subtitle" style="margin-bottom: 16px;">How mature is your current data pipeline and analytics infrastructure?</p>
+
+                    <div class="question-options">
+                        <div class="option" onclick="selectOption(this, 'q2', 1)">
+                            <input type="radio" name="q2" value="1">
+                            <label>We export data manually to analyze it; no automated data pipeline exists</label>
+                        </div>
+                        <div class="option" onclick="selectOption(this, 'q2', 2)">
+                            <input type="radio" name="q2" value="2">
+                            <label>We have basic logging to a database, but limited structured analytics</label>
+                        </div>
+                        <div class="option" onclick="selectOption(this, 'q2', 3)">
+                            <input type="radio" name="q2" value="3">
+                            <label>We have a data warehouse (Redshift, BigQuery, or Snowflake) with some ETL pipelines feeding it</label>
+                        </div>
+                        <div class="option" onclick="selectOption(this, 'q2', 4)">
+                            <input type="radio" name="q2" value="4">
+                            <label>We have a comprehensive data pipeline with event streaming, transformation, and analytics dashboards</label>
+                        </div>
+                        <div class="option" onclick="selectOption(this, 'q2', 5)">
+                            <input type="radio" name="q2" value="5">
+                            <label>We have a production-grade data platform with real-time streaming, feature stores, and ML-ready data sets</label>
+                        </div>
+                    </div>
+
+                    <div class="context-box">
+                        <div class="context-label">Why this matters:</div>
+                        ML models require clean, structured data. A mature data pipeline is the foundation for building reliable AI features.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 4: Question 3 -->
+            <div class="form-section" data-section="3">
+                <h2 class="section-title">Tech Stack & Infrastructure</h2>
+                <p class="section-subtitle">Question 3 of 11</p>
+
+                <div class="form-group">
+                    <label>Q3: PostgreSQL-Powered Analytics Capabilities</label>
+                    <p class="section-subtitle" style="margin-bottom: 16px;">Your PostgreSQL database holds rich task metadata. How deeply are you currently leveraging it for analytics and insights?</p>
+
+                    <div class="question-options">
+                        <div class="option" onclick="selectOption(this, 'q3', 1)">
+                            <input type="radio" name="q3" value="1">
+                            <label>We use PostgreSQL mainly for transactional storage; we don't run complex analytical queries</label>
+                        </div>
+                        <div class="option" onclick="selectOption(this, 'q3', 2)">
+                            <input type="radio" name="q3" value="2">
+                            <label>We run occasional reports on PostgreSQL, but performance is a concern for complex queries</label>
+                        </div>
+                        <div class="option" onclick="selectOption(this, 'q3', 3)">
+                            <input type="radio" name="q3" value="3">
+                            <label>We have optimized PostgreSQL for reporting with proper indexing and materialized views</label>
+                        </div>
+                        <div class="option" onclick="selectOption(this, 'q3', 4)">
+                            <input type="radio" name="q3" value="4">
+                            <label>We use PostgreSQL JSON capabilities and advanced features (window functions, partitioning) for insights</label>
+                        </div>
+                        <div class="option" onclick="selectOption(this, 'q3', 5)">
+                            <input type="radio" name="q3" value="5">
+                            <label>We have a sophisticated PostgreSQL analytics layer with custom aggregations, feature engineering, and real-time metrics</label>
+                        </div>
+                    </div>
+
+                    <div class="context-box">
+                        <div class="context-label">Why this matters:</div>
+                        PostgreSQL can power many ML use cases directly. Your ability to extract features impacts AI development speed.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 5: Question 4 (abbreviated for demo) -->
+            <div class="form-section" data-section="4">
+                <h2 class="section-title">Product AI Readiness</h2>
+                <p class="section-subtitle">Questions 4-6 of 11</p>
+
+                <div class="form-group">
+                    <label>Q4: Intelligent Task Prioritization</label>
+                    <p class="section-subtitle" style="margin-bottom: 16px;">Task prioritization is a core pain point in project management. How do you currently handle it?</p>
+
+                    <div class="question-options">
+                        <div class="option" onclick="selectOption(this, 'q4', 1)">
+                            <input type="radio" name="q4" value="1">
+                            <label>Users manually set priority; there's no intelligent prioritization assistance</label>
+                        </div>
+                        <div class="option" onclick="selectOption(this, 'q4', 2)">
+                            <input type="radio" name="q4" value="2">
+                            <label>We offer priority templates or heuristics, but they're static</label>
+                        </div>
+                        <div class="option" onclick="selectOption(this, 'q4', 3)">
+                            <input type="radio" name="q4" value="3">
+                            <label>We have basic smart prioritization (e.g., flagging overdue items)</label>
+                        </div>
+                        <div class="option" onclick="selectOption(this, 'q4', 4)">
+                            <input type="radio" name="q4" value="4">
+                            <label>We have ML models suggesting task priority based on context</label>
+                        </div>
+                        <div class="option" onclick="selectOption(this, 'q4', 5)">
+                            <input type="radio" name="q4" value="5">
+                            <label>We have AI-powered adaptive prioritization that learns from user behavior</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 6: Summary (abbreviated) -->
+            <div class="form-section" data-section="5">
+                <h2 class="section-title">Almost Done</h2>
+                <p class="section-subtitle">Final thoughts</p>
+
+                <div class="form-group">
+                    <label for="additionalNotes">Any additional comments or context? (optional)</label>
+                    <textarea id="additionalNotes" class="input-field" style="min-height: 120px; font-family: inherit;" placeholder="Tell us about your biggest challenges, current initiatives, or specific areas where you'd like AI help..."></textarea>
+                </div>
+
+                <div class="context-box">
+                    <div class="context-label">What happens next:</div>
+                    Your responses will be analyzed to calculate your AI Maturity Level and identify key skill gaps. We'll design a custom curriculum path tailored to your team's needs and your company's strategic goals.
+                </div>
+            </div>
+
+            <!-- Success Screen -->
+            <div class="success-screen" id="successScreen">
+                <div class="success-icon">✓</div>
+                <h2>Assessment Submitted!</h2>
+                <p>Thank you for completing the AI Readiness Assessment. Your responses have been recorded and will be analyzed by our team.</p>
+                <div class="email-confirmation">
+                    <p><strong>Confirmation sent to:</strong> <span id="confirmEmail">your@email.com</span></p>
+                    <p style="margin-top: 8px;">Check your email for next steps and preliminary findings.</p>
+                </div>
+                <p>We'll follow up within 2 business days with:</p>
+                <ul style="text-align: left; display: inline-block; margin: 20px 0; color: var(--text-light);">
+                    <li>Your AI Maturity Level (1.0 - 5.0)</li>
+                    <li>Dimension breakdown (Tech, Product, Business, Org)</li>
+                    <li>Key skill gaps analysis</li>
+                    <li>Recommended curriculum path</li>
+                    <li>Discovery call scheduling</li>
+                </ul>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="button-group" id="navigationButtons">
+                <button type="button" class="btn-secondary" id="prevBtn" onclick="previousSection()">← Previous</button>
+                <button type="button" class="btn-primary" id="nextBtn" onclick="nextSection()">Next →</button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Velocity Labs AI Assessment | Powered by AI-Next Education & Consulting</p>
+            <p style="margin-top: 8px;">Your data is secure and will only be used to inform your personalized curriculum.</p>
+        </div>
+    </div>
+
+    <script>
+        const TOTAL_SECTIONS = 6;
+        let currentSection = 0;
+        const formData = {};
+
+        // Initialize
+        document.getElementById('totalSteps').textContent = TOTAL_SECTIONS;
+        updateProgress();
+
+        function selectOption(element, questionId, value) {
+            // Remove previous selection
+            const options = element.parentElement.querySelectorAll('.option');
+            options.forEach(opt => opt.classList.remove('selected'));
+
+            // Mark new selection
+            element.classList.add('selected');
+            element.querySelector(`input[name="${questionId}"]`).checked = true;
+            formData[questionId] = value;
+        }
+
+        function nextSection() {
+            // Validate current section
+            if (!validateSection(currentSection)) {
+                return;
+            }
+
+            if (currentSection < TOTAL_SECTIONS - 1) {
+                currentSection++;
+                showSection(currentSection);
+                updateProgress();
+                window.scrollTo(0, 0);
+            } else {
+                submitForm();
+            }
+        }
+
+        function previousSection() {
+            if (currentSection > 0) {
+                currentSection--;
+                showSection(currentSection);
+                updateProgress();
+                window.scrollTo(0, 0);
+            }
+        }
+
+        function showSection(index) {
+            document.querySelectorAll('.form-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.querySelector(`[data-section="${index}"]`).classList.add('active');
+
+            // Update button text
+            const nextBtn = document.getElementById('nextBtn');
+            const prevBtn = document.getElementById('prevBtn');
+
+            if (index === TOTAL_SECTIONS - 1) {
+                nextBtn.textContent = 'Submit Assessment';
+            } else {
+                nextBtn.textContent = 'Next →';
+            }
+
+            prevBtn.style.display = index === 0 ? 'none' : 'block';
+        }
+
+        function updateProgress() {
+            const progress = ((currentSection + 1) / TOTAL_SECTIONS) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('currentStep').textContent = currentSection + 1;
+        }
+
+        function validateSection(section) {
+            const validations = {
+                0: validateContact,
+                1: validateQuestion('q1'),
+                2: validateQuestion('q2'),
+                3: validateQuestion('q3'),
+                4: validateQuestion('q4'),
+                5: () => true // Final section optional
+            };
+
+            return validations[section] ? validations[section]() : true;
+        }
+
+        function validateContact() {
+            const fields = ['fullName', 'email', 'department', 'role'];
+            let isValid = true;
+
+            fields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                const validation = field.parentElement.querySelector('.form-validation');
+
+                if (!field.value.trim()) {
+                    validation.textContent = 'This field is required';
+                    validation.classList.add('show');
+                    isValid = false;
+                } else {
+                    validation.classList.remove('show');
+                    formData[fieldId] = field.value;
+                }
+            });
+
+            return isValid;
+        }
+
+        function validateQuestion(questionId) {
+            return () => {
+                const selected = document.querySelector(`input[name="${questionId}"]:checked`);
+                if (!selected) {
+                    alert('Please select an option before proceeding');
+                    return false;
+                }
+                return true;
+            };
+        }
+
+        function submitForm() {
+            // Save to localStorage for backup
+            localStorage.setItem('velocityLabsAssessment', JSON.stringify(formData));
+
+            // Show success screen
+            document.querySelectorAll('.form-section').forEach(s => s.style.display = 'none');
+            document.getElementById('successScreen').classList.add('active');
+            document.getElementById('navigationButtons').style.display = 'none';
+            document.getElementById('confirmEmail').textContent = formData.email;
+
+            // In production, would POST to server here
+            console.log('Form submitted:', formData);
+
+            // Simulate server submission
+            simulateServerSubmission();
+        }
+
+        function simulateServerSubmission() {
+            console.log('Sending assessment to server...');
+            // In production: fetch('/api/assessments', { method: 'POST', body: JSON.stringify(formData) })
+        }
+
+        // Show initial section
+        showSection(0);
+    </script>
+</body>
+</html>

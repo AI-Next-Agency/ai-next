@@ -1,0 +1,106 @@
+[
+  {
+    "id": "q1",
+    "title": "Coding Agents Usage",
+    "label": "How are AI-powered coding tools used in your engineering teams?",
+    "context": "Coding agent adoption is the strongest leading indicator of how quickly a team can absorb broader AI capability.",
+    "options": [
+      { "value": 1, "label": "Not used", "context": "No team members use AI coding tools" },
+      { "value": 2, "label": "ChatGPT / Claude manually", "context": "Copy-paste prompts, no IDE integration" },
+      { "value": 3, "label": "IDE extensions", "context": "GitHub Copilot, Cursor, Codeium" },
+      { "value": 4, "label": "Terminal-based agents", "context": "Claude Code, Codex, Aider in workflow" },
+      { "value": 5, "label": "Custom internal agents", "context": "Self-built tools on top of LLM APIs" }
+    ]
+  },
+  {
+    "id": "q2",
+    "title": "LLM Foundational Knowledge",
+    "label": "What is your team's understanding of how LLMs actually work?",
+    "context": "Foundational understanding determines whether the team can debug, evaluate, and choose the right model for a job.",
+    "options": [
+      { "value": 1, "label": "Beginner", "context": "Basic ChatGPT usage; no mental model" },
+      { "value": 2, "label": "Intermediate", "context": "Understand tokens, context windows, limitations" },
+      { "value": 3, "label": "Working knowledge", "context": "Comfortable with prompting patterns and tradeoffs" },
+      { "value": 4, "label": "Advanced", "context": "Embeddings, RAG, fine-tuning concepts understood" },
+      { "value": 5, "label": "Expert", "context": "Built and shipped production LLM systems" }
+    ]
+  },
+  {
+    "id": "q3",
+    "title": "Automated LLM Usage",
+    "label": "Do you use LLMs in background processes or only in interactive chat?",
+    "context": "The shift from interactive to automated LLM use is where most of the ROI shows up.",
+    "options": [
+      { "value": 1, "label": "Manual only", "context": "All LLM use is human-in-the-loop chat" },
+      { "value": 2, "label": "Limited automation", "context": "POC or pilot of one batch job" },
+      { "value": 3, "label": "Some processes automated", "context": "A few production jobs run on a schedule" },
+      { "value": 4, "label": "Many processes automated", "context": "LLMs embedded across multiple workflows" },
+      { "value": 5, "label": "Fully systematized", "context": "Most repeatable cognitive work is LLM-mediated" }
+    ]
+  },
+  {
+    "id": "q4",
+    "title": "MCP / Skills / Plugin Expertise",
+    "label": "How comfortable is your team with custom tools, plugins, or MCP servers?",
+    "context": "Tool/plugin authorship is where AI stops being a chat product and becomes infrastructure.",
+    "options": [
+      { "value": 1, "label": "Unfamiliar with the concept", "context": "Have not heard of MCP / plugins" },
+      { "value": 2, "label": "Aware but not using", "context": "Know it exists; have not tried" },
+      { "value": 3, "label": "Using off-the-shelf", "context": "Using public plugins and integrations" },
+      { "value": 4, "label": "Configured / customized", "context": "Tuned existing tools for our workflow" },
+      { "value": 5, "label": "Built our own", "context": "Authored MCP servers / skills in-house" }
+    ]
+  },
+  {
+    "id": "q5",
+    "title": "Data Infrastructure",
+    "label": "How mature is your data infrastructure for analytics and ML?",
+    "context": "Data infrastructure is the floor for what AI work is even possible.",
+    "options": [
+      { "value": 1, "label": "No data warehouse", "context": "No structured data pipeline" },
+      { "value": 2, "label": "Basic logging", "context": "Limited ability to query for analytics" },
+      { "value": 3, "label": "Data warehouse exists", "context": "Analytics database with ETL for key datasets" },
+      { "value": 4, "label": "Comprehensive infrastructure", "context": "Automated pipelines, analytics tools in use" },
+      { "value": 5, "label": "ML-ready platform", "context": "Feature store, real-time processing, ML datasets" }
+    ]
+  },
+  {
+    "id": "q6",
+    "title": "Team Capabilities",
+    "label": "What is your team's current ML / data science / analytics experience?",
+    "context": "Team expertise determines training needs, hiring urgency, and realistic timelines.",
+    "options": [
+      { "value": 1, "label": "No ML expertise", "context": "No team members with ML / DS background" },
+      { "value": 2, "label": "Basic analytics", "context": "1-2 people with SQL / Python / Excel skills" },
+      { "value": 3, "label": "Multiple data people", "context": "3+ with data background; basic ML familiarity" },
+      { "value": 4, "label": "Junior data scientist", "context": "Dedicated analyst or junior DS on team" },
+      { "value": 5, "label": "Experienced ML team", "context": "Production ML deployments under their belt" }
+    ]
+  },
+  {
+    "id": "q7",
+    "title": "AI Strategy & Leadership",
+    "label": "How committed is leadership to AI as a strategic priority?",
+    "context": "Leadership commitment determines budget, headcount, and how patient the org will be with the J-curve.",
+    "options": [
+      { "value": 1, "label": "Not a priority", "context": "No budget or plan for AI initiatives" },
+      { "value": 2, "label": "Interest only", "context": "Curiosity, no formal strategy" },
+      { "value": 3, "label": "Early strategy", "context": "Budget allocated, strategy in development" },
+      { "value": 4, "label": "Clear roadmap", "context": "Dedicated resources and team ownership" },
+      { "value": 5, "label": "Central to strategy", "context": "Significant investment, C-level accountability" }
+    ]
+  },
+  {
+    "id": "q8",
+    "title": "Process Automation Maturity",
+    "label": "How much of your day-to-day work is already automated (any kind)?",
+    "context": "Existing automation muscle predicts how fast AI automation can be layered on.",
+    "options": [
+      { "value": 1, "label": "Mostly manual", "context": "Few or no automated workflows" },
+      { "value": 2, "label": "Some scripts", "context": "Ad-hoc scripts run by individuals" },
+      { "value": 3, "label": "Standard SaaS automations", "context": "Zapier / n8n / Make in regular use" },
+      { "value": 4, "label": "Custom workflows", "context": "Internal tools and orchestration in production" },
+      { "value": 5, "label": "Automation-first culture", "context": "New process is automated by default" }
+    ]
+  }
+]

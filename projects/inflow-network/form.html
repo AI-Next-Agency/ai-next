@@ -292,6 +292,7 @@
         function submitForm() {
             const submitBtn = document.getElementById('nextBtn');
             submitBtn.disabled = true;
+            submitBtn.style.display = 'none';
             saveCurrentInputs();
 
             const score = calculateScore();
@@ -320,16 +321,19 @@
             .then(({ ok, data }) => {
                 if (ok && data.success) {
                     localStorage.removeItem(STORAGE_KEY);
-                    goToStep(TOTAL_STEPS);
+                    currentStep = TOTAL_STEPS;
+                    updateStepDisplay();
                 } else {
                     showError('Failed to submit: ' + (data.error || 'Unknown error'));
                     submitBtn.disabled = false;
+                    submitBtn.style.display = 'block';
                 }
             })
             .catch(err => {
                 console.error(err);
                 showError('Network error. Please try again.');
                 submitBtn.disabled = false;
+                submitBtn.style.display = 'block';
             });
         }
 

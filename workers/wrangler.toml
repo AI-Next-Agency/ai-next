@@ -1,0 +1,21 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "form-submission"
+main = "form-submission.js"
+compatibility_date = "2026-01-01"
+
+# KV namespace for IP-based rate limiting (5-min window per IP).
+# Create the namespace once with:
+#   wrangler kv:namespace create FORM_SUBMISSIONS
+# then paste the returned id below.
+[[kv_namespaces]]
+binding = "FORM_SUBMISSIONS"
+id = "129e518f04334ead95b117ede8b2e94c"
+
+# GITHUB_TOKEN is stored as a Worker secret (NOT in this file). Set it once with:
+#   wrangler secret put GITHUB_TOKEN
+# It needs `contents:write` and `actions:write` on the AI-Next-Agency/ai-next repo.
+
+# Optional: custom domain. Comment in once DNS is set.
+# routes = [
+#   { pattern = "form-submission.inflownetwork.com", custom_domain = true }
+# ]

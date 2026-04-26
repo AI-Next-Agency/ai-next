@@ -1,0 +1,23 @@
+{
+  "skill_name": "ainext-company-analyzer",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Onboard a new company for AI assessment. Company name: Velocity Labs. Website: https://velocitylabs.io. They're a Series B SaaS startup (30 people) building project management software. Their tech stack is Node.js backend, React frontend, PostgreSQL, deployed on AWS. They want to understand where they can use AI to improve their product and operations.",
+      "expected_output": "The skill should: (1) Analyze Velocity Labs' business model, tech stack, and market position; (2) Generate 8-12 custom assessment questions tailored to their SaaS product challenges, tech stack, and scale; (3) Create a GitHub-hosted assessment form with those questions; (4) Provide a live URL ready to share with their team; (5) Set up automated response processing.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Add company: Design Horizon. URL is https://design-horizon.com. They're a 15-person design agency focused on UX/UI for healthcare clients. No engineering team—mostly designers and strategists. They're interested in how AI can improve their design process and client deliverables.",
+      "expected_output": "The skill should: (1) Analyze their service-based business model and non-technical team; (2) Generate assessment questions focused on design process, client work automation, tool integration, and AI in design; (3) Create an assessment form that doesn't assume technical knowledge; (4) Provide deployment details and form URL; (5) Suggest relevant training topics based on their gaps.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Analyze FinConnect (https://finconnect.io) for onboarding. They're a fintech company, Series A, 25 people. Built on Python backend, React, real-time data processing. Focus on payment infrastructure for SMBs. They need to assess AI maturity and identify where machine learning could add value.",
+      "expected_output": "The skill should: (1) Research fintech-specific AI use cases (fraud detection, risk analysis, customer insights); (2) Generate assessment questions reflecting their specific tech stack (Python, real-time processing) and business domain (payments, compliance); (3) Create a form addressing both technical and compliance concerns; (4) Provide deployment steps and live URL; (5) Flag any compliance-related considerations.",
+      "files": []
+    }
+  ]
+}

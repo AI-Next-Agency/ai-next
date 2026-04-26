@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 scripts/add_company.py --name \"Test Acme\" --url \"https://test.acme\" --no-commit)",
+      "Bash(python3 -c ' *)"
+    ]
+  }
+}

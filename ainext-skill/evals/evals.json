@@ -1,0 +1,23 @@
+{
+  "skill_name": "ainext-company-onboarding",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I need to add a new client called 'TechStart İstanbul' to our onboarding pipeline. Their website is https://techstart.istanbul and I want to set up the full assessment and automation. What's the complete process?",
+      "expected_output": "Step-by-step onboarding guide covering: 1) Company profiling, 2) Python script usage, 3) Google Form creation, 4) Sheet integration, 5) Automation setup. Should include exact command to run and links to templates.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Can you help me customize the assessment form questions for our specific industry (manufacturing)? We want to focus more on production automation and less on startup culture stuff.",
+      "expected_output": "Assessment form customization guide showing: 1) Which core questions to keep, 2) How to modify for manufacturing context, 3) New question suggestions for production AI, 4) How to update Google Forms template, 5) Impact on sync automation.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "We already have 5 companies in our pipeline (Infinia, Boğaziçi Yazılım, TechStart, DataCorp, CloudFirst). What's the best way to manage them all with the automated syncing? Should we set anything else up?",
+      "expected_output": "Multi-company management strategy covering: 1) How sync routine handles multiple companies, 2) Folder organization best practices, 3) Monitoring & tracking responses across companies, 4) Scaling considerations, 5) GitHub structure for 5+ companies.",
+      "files": []
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Yeni bir şirket ekler ve otomatik onboarding pipeline'ı başlatır.
 
@@ -8,6 +9,7 @@ Usage:
 """
 
 import os
+import re
 import sys
 import argparse
 from pathlib import Path
@@ -15,12 +17,48 @@ from datetime import datetime
 import subprocess
 import json
 
+DEFAULT_WORKER_URL = "https://form-submission.inflownetwork.com"
+REPO_ROOT = Path(__file__).resolve().parent.parent
+
+def slugify(name):
+    s = name.lower()
+    for a, b in (("ş","s"),("ç","c"),("ğ","g"),("ı","i"),("ü","u"),("ö","o")):
+        s = s.replace(a, b)
+    s = re.sub(r"[^a-z0-9]+", "-", s).strip("-")
+    if not re.fullmatch(r"[a-z0-9-]{1,50}", s):
+        raise ValueError(f"slug {s!r} doesn't match required pattern [a-z0-9-]{{1,50}}")
+    return s
+
 def create_company_folder(company_name):
     """Şirket klasörünü oluştur"""
-    company_slug = company_name.lower().replace(" ", "-").replace("ş", "s").replace("ç", "c").replace("ğ", "g").replace("ı", "i").replace("ü", "u").replace("ö", "o")
+    company_slug = slugify(company_name)
     company_path = Path("projects") / company_slug
     company_path.mkdir(parents=True, exist_ok=True)
     return company_path, company_slug
+
+def render_form(company_path, company_slug, company_name, worker_url, questions_path):
+    """Render templates/assessment-form.html.tmpl into projects/<slug>/form.html
+    and docs/projects/<slug>/index.html (for GitHub Pages)."""
+    template_path = REPO_ROOT / "templates" / "assessment-form.html.tmpl"
+    template = template_path.read_text()
+    questions = json.loads(questions_path.read_text())
+    if not isinstance(questions, list) or not questions:
+        raise ValueError("questions JSON must be a non-empty array")
+
+    rendered = (template
+        .replace("{{COMPANY_NAME}}", company_name)
+        .replace("{{COMPANY_SLUG}}", company_slug)
+        .replace("{{WORKER_URL}}", worker_url)
+        .replace("{{QUESTIONS_JSON}}", json.dumps(questions))
+    )
+
+    form_path = company_path / "form.html"
+    form_path.write_text(rendered)
+
+    pages_dir = REPO_ROOT / "docs" / "projects" / company_slug
+    pages_dir.mkdir(parents=True, exist_ok=True)
+    (pages_dir / "index.html").write_text(rendered)
+    return form_path, pages_dir / "index.html"
 
 def create_company_profile(company_path, company_name, company_url):
     """Şirket profili template'ini oluştur"""
@@ -108,19 +146,19 @@ def create_readme(company_path, company_name, company_slug):
 
 ---
 
-## 📋 İmportant Links
+## 📋 Important Links
 
-**Google Form**: *TBD - Links'i ekle*
-**Google Sheet**: *TBD - Links'i ekle*
+**Live Form**: https://ai-next-agency.github.io/ai-next/projects/{company_slug}/
 
 ---
 
 ## 🔄 Otomasyonu
 
-Bu proje **otomatik senkronizasyon** kullanıyor:
-- Google Sheet'ten yanıtlar otomatik olarak alınıyor
-- Her gün markdown'a dönüştürülüyor
-- GitHub'a otomatik commit yapılıyor
+Bu proje in-house pipeline kullanıyor:
+- Form gönderildiğinde Cloudflare Worker'a POST atar
+- Worker GitHub Actions tetikler (repository_dispatch)
+- Action `responses/<ts>_response.md` yazar ve `<SLUG>_ASSESSMENT_RESULTS.md` özetini günceller
+- Tüm pipeline otomatik, manuel müdahale yok
 
 ---
 
@@ -159,8 +197,8 @@ def create_status_file(company_path, company_name):
 - [x] Profil template'i hazırlandı
 - [x] README.md yazıldı
 - [x] Assessment template kopyalandı
-- [ ] Google Form oluşturuldu
-- [ ] Google Sheet linklendirildi
+- [x] HTML form üretildi (form.html + docs/projects/<slug>/index.html)
+- [ ] GitHub'a push edildi (Pages otomatik servis edecek)
 - [ ] Form link'i gönderildi
 
 ---
@@ -176,16 +214,15 @@ def create_status_file(company_path, company_name):
 2. **Profil Tamamla**: {company_name}_PROFIL.md'yi güncelle
 
 ### SONRA YAPILACAK (1-2 Gün)
-3. **Google Form**: Assessment formunu Google Forms'ta oluştur
-4. **Google Sheet**: Form responses'ları toplayan sheet oluştur
-5. **Link'leri Ekle**: README.md'ye form ve sheet URL'lerini ekle
-6. **İletişim**: {company_name}'ye form link'ini gönder
+3. **Soruları Özelleştir**: Gerekirse `templates/default-questions.json`'dan kopyalayıp şirkete özel hale getir, yeniden render et
+4. **Push**: `git push` — GitHub Pages otomatik yayına alır
+5. **İletişim**: {company_name}'ye form link'ini gönder (https://ai-next-agency.github.io/ai-next/projects/<slug>/)
 
 ### ARDINDAN (Responses başladıktan sonra)
-7. **Senkronizasyon**: Günlük rutine devrededen sheet'i senkronize et
-8. **Analiz**: Assessment sonuçlarını analiz et
-9. **Curriculum**: Kişiselleştirilmiş curriculum öner
-10. **Pitch**: Kurucularla discovery call planla
+6. **Otomatik Akış**: Her gönderim Cloudflare Worker → GitHub Action üzerinden `responses/` klasörüne düşer
+7. **Analiz**: Assessment sonuçlarını analiz et
+8. **Curriculum**: Kişiselleştirilmiş curriculum öner
+9. **Pitch**: Kurucularla discovery call planla
 
 ---
 
@@ -229,7 +266,7 @@ def git_commit(company_slug):
     """Git'e commit et"""
     try:
         subprocess.run(
-            ["git", "add", f"projects/{company_slug}/"],
+            ["git", "add", f"projects/{company_slug}/", f"docs/projects/{company_slug}/"],
             check=True,
             capture_output=True
         )
@@ -256,6 +293,11 @@ def main():
     )
     parser.add_argument("--name", required=True, help="Şirket adı")
     parser.add_argument("--url", default="", help="Şirket web sitesi URL'si (opsiyonel)")
+    parser.add_argument("--questions", default=str(REPO_ROOT / "templates" / "default-questions.json"),
+                        help="Path to questions JSON (default: templates/default-questions.json)")
+    parser.add_argument("--worker-url", default=DEFAULT_WORKER_URL,
+                        help=f"Cloudflare Worker submission endpoint (default: {DEFAULT_WORKER_URL})")
+    parser.add_argument("--no-commit", action="store_true", help="Skip git commit")
 
     args = parser.parse_args()
 
@@ -292,8 +334,19 @@ def main():
         notes_path = create_notes_folder(company_path)
         print(f"   ✅ Notes klasörü oluşturuldu: notes/")
 
-        # Adım 7: Git commit
-        git_commit(company_slug)
+        # Adım 7: HTML formu render et
+        form_path, pages_path = render_form(
+            company_path, company_slug, args.name,
+            args.worker_url, Path(args.questions),
+        )
+        print(f"   ✅ Form üretildi: {form_path}")
+        print(f"   ✅ GitHub Pages kopyası: {pages_path.relative_to(REPO_ROOT)}")
+
+        # Adım 8: Git commit
+        if not args.no_commit:
+            git_commit(company_slug)
+
+        profile_filename = f"{args.name.upper().replace(' ', '_')}_PROFIL.md"
 
         print(f"""
 ╔═══════════════════════════════════════════════════════════╗
@@ -303,16 +356,15 @@ def main():
 📂 Proje Lokasyonu: projects/{company_slug}/
 
 📋 Hemen Yapılması Gerekenler:
-   1. {company_slug}/{company_name.upper().replace(' ', '_')}_PROFIL.md açıp araştırmaları yap
-   2. Google Forms'ta Assessment formu oluştur
-   3. Google Sheet'te response collector oluştur
-   4. {company_slug}/README.md'ye form & sheet URL'lerini ekle
-   5. {company_slug}/STATUS.md'yi güncelle
+   1. {company_slug}/{profile_filename} açıp araştırmaları yap
+   2. (Opsiyonel) Sorular özelse: templates/default-questions.json'dan kopyala, düzenle, --questions ile yeniden çalıştır
+   3. git push  →  GitHub Pages otomatik yayına alır
+   4. Form URL: https://ai-next-agency.github.io/ai-next/projects/{company_slug}/
+   5. {company_slug}/STATUS.md'yi güncelle, link'i şirkete gönder
 
 💡 İpuçları:
-   - ASSESSMENT_TEMPLATE.md'yi Google Forms için şablon olarak kullan
-   - Her şeyi git tracked tutuyoruz (otomatik commit yaptık)
-   - Günlük sync routine tüm şirketleri otomatik senkronize edecek
+   - Form gönderildiğinde Cloudflare Worker → GitHub Action → projects/{company_slug}/responses/ otomatik akar
+   - Sıfır manuel müdahale; özet dosyası her gönderim sonrası güncellenir
 
 🔄 Sonraki Komutlar:
    cd projects/{company_slug}/

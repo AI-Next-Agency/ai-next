@@ -1,0 +1,105 @@
+name: Process Assessment Submission
+
+on:
+  repository_dispatch:
+    types: [assessment-submission]
+
+jobs:
+  process-assessment:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Write response + summary
+        env:
+          PAYLOAD: ${{ toJson(github.event.client_payload) }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, re, sys
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          payload = json.loads(os.environ["PAYLOAD"])
+
+          company = payload.get("company", "")
+          if not re.fullmatch(r"[a-z0-9-]{1,50}", company):
+              print(f"::error::invalid company slug: {company!r}", file=sys.stderr)
+              sys.exit(1)
+
+          project_dir = Path("projects") / company
+          if not project_dir.exists():
+              print(f"::error::projects/{company} does not exist", file=sys.stderr)
+              sys.exit(1)
+
+          responses_dir = project_dir / "responses"
+          responses_dir.mkdir(exist_ok=True)
+
+          ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+          response_path = responses_dir / f"{ts}_response.md"
+
+          questions_md = "\n".join(
+              f"- **{q.get('question','?')}**: {q.get('answer','?')} (Score: {q.get('score','?')}/5)"
+              for q in payload.get("questions", [])
+          )
+
+          response_md = f"""# Assessment Response — {ts}
+
+          ## Contact
+          - **Name**: {payload.get('name','')}
+          - **Email**: {payload.get('email','')}
+          - **Department**: {payload.get('department','')}
+          - **Role**: {payload.get('role','')}
+          - **Submitted**: {payload.get('timestamp', ts)}
+
+          ## Responses
+
+          {questions_md}
+
+          ## Result
+          - **AI Maturity Score**: {payload.get('aiMaturityScore','?')}
+          - **Maturity Level**: {payload.get('maturityLevel','?')}
+          """
+          # Strip leading indentation
+          response_md = "\n".join(line.lstrip() if line.startswith("          ") else line for line in response_md.splitlines())
+          response_path.write_text(response_md + "\n")
+          print(f"wrote {response_path}")
+
+          # Regenerate summary
+          summary_name = f"{company.upper().replace('-','_')}_ASSESSMENT_RESULTS.md"
+          summary_path = project_dir / summary_name
+
+          all_responses = sorted(responses_dir.glob("*_response.md"))
+          summary = [
+              f"# {company} — Assessment Results",
+              "",
+              f"**Last Updated**: {datetime.now(timezone.utc).isoformat()}",
+              f"**Total Responses**: {len(all_responses)}",
+              "",
+              "---",
+              "",
+          ]
+          for r in all_responses:
+              summary.append(r.read_text())
+              summary.append("\n---\n")
+          summary_path.write_text("\n".join(summary))
+          print(f"wrote {summary_path}")
+          PY
+
+      - name: Commit and push
+        run: |
+          git config --local user.email "assessment-bot@ainext.local"
+          git config --local user.name "Assessment Bot"
+
+          COMPANY="${{ github.event.client_payload.company }}"
+          NAME="${{ github.event.client_payload.name }}"
+
+          git add "projects/$COMPANY/"
+          git commit -m "assessment: response from $NAME ($COMPANY)" || { echo "nothing to commit"; exit 0; }
+          git push origin main
