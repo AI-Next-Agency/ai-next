@@ -1,0 +1,30 @@
+{
+  "name": "assessment-responses-api",
+  "version": "1.0.0",
+  "description": "Minimalist Cloudflare Worker API for AI assessment form responses",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy:dev": "wrangler deploy --env development",
+    "deploy:prod": "wrangler deploy --env production",
+    "build": "esbuild src/index.ts --bundle --outfile=dist/index.js --platform=browser --minify",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "hono": "^4.0.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20231218.0",
+    "@types/node": "^20.0.0",
+    "esbuild": "^0.19.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0",
+    "wrangler": "^3.26.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

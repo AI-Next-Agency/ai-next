@@ -1,0 +1,60 @@
+name = "assessment-responses-api"
+type = "javascript"
+main = "src/index.ts"
+compatibility_date = "2024-12-16"
+compatibility_flags = ["nodejs_compat"]
+
+# ============================================================================
+# Local Development
+# ============================================================================
+
+[env.development]
+name = "assessment-responses-api-dev"
+routes = [
+  { pattern = "api.dev.example.com/api/*", zone_name = "dev.example.com" }
+]
+vars = { ENVIRONMENT = "development" }
+
+[[env.development.d1_databases]]
+binding = "DB"
+database_name = "assessment-responses-dev"
+database_id = "YOUR_DEV_DB_ID_HERE"
+preview_database_id = "YOUR_PREVIEW_DB_ID_HERE"
+
+# ============================================================================
+# Production
+# ============================================================================
+
+[env.production]
+name = "assessment-responses-api"
+routes = [
+  { pattern = "api.example.com/api/*", zone_name = "example.com" }
+]
+vars = { ENVIRONMENT = "production" }
+# NOTE: Set API_SECRET via wrangler secret put API_SECRET
+# This prevents unauthorized access to GET endpoints (list, detail, stats)
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "assessment-responses"
+database_id = "YOUR_PROD_DB_ID_HERE"
+
+# ============================================================================
+# Build Configuration
+# ============================================================================
+
+[build]
+command = "npm run build"
+cwd = "."
+main = "dist/index.js"
+
+[build.upload]
+format = "service-worker"
+
+# ============================================================================
+# Triggers (optional—if you want scheduled cleanup/aggregation)
+# ============================================================================
+
+[[triggers.crons]]
+cron = "0 2 * * *"  # Daily at 2 AM UTC
+# Handler: export function scheduled(event: ScheduledEvent) { ... }
