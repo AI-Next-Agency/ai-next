@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tower - AI Readiness Assessment</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #ff6b35;
+            --secondary: #f7931e;
+            --accent: #004e89;
+            --light-bg: #f5f5f5;
+            --text-dark: #1a1a1a;
+            --text-light: #666;
+            --border: #ddd;
+            --success: #4caf50;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text-dark);
+        }
+        .container { max-width: 700px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); overflow: hidden; }
+        .header { background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%); color: white; padding: 40px 30px; text-align: center; }
+        .header h1 { font-size: 28px; margin-bottom: 10px; font-weight: 700; }
+        .header p { font-size: 14px; opacity: 0.95; line-height: 1.5; }
+        .progress-bar { background: rgba(255,255,255,0.3); height: 4px; margin-top: 20px; }
+        .progress-fill { height: 100%; background: white; transition: width 0.3s ease; }
+        .form-content { padding: 40px 30px; }
+        .step { display: none; animation: fadeIn 0.4s ease; }
+        .step.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .step-title { font-size: 20px; font-weight: 600; color: var(--accent); margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
+        .step-number { background: var(--primary); color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; flex-shrink: 0; }
+        .form-group { margin-bottom: 25px; }
+        label { display: block; font-weight: 500; margin-bottom: 10px; color: var(--text-dark); font-size: 14px; }
+        .required { color: var(--primary); }
+        input[type="text"], input[type="email"], select { width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 6px; font-size: 14px; transition: border-color 0.3s; font-family: inherit; }
+        input[type="text"]:focus, input[type="email"]:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1); }
+        .radio-group { display: flex; flex-direction: column; gap: 12px; }
+        .radio-option { display: flex; align-items: flex-start; padding: 12px; border: 2px solid var(--border); border-radius: 6px; cursor: pointer; transition: all 0.3s; }
+        .radio-option:hover { border-color: var(--primary); background: rgba(255, 107, 53, 0.05); }
+        input[type="radio"] { margin-right: 12px; margin-top: 2px; cursor: pointer; accent-color: var(--primary); }
+        .option-text { flex: 1; }
+        .option-text strong { display: block; color: var(--text-dark); margin-bottom: 2px; }
+        .option-text .context { font-size: 12px; color: var(--text-light); }
+        .context-box { background: rgba(4, 78, 137, 0.05); border-left: 4px solid var(--accent); padding: 12px 15px; margin-top: 10px; border-radius: 4px; font-size: 13px; color: var(--text-light); line-height: 1.5; }
+        .context-box strong { color: var(--accent); }
+        .error { color: #d32f2f; font-size: 12px; margin-top: 5px; }
+        .buttons { display: flex; gap: 12px; justify-content: space-between; margin-top: 35px; padding-top: 25px; border-top: 2px solid var(--light-bg); }
+        button { padding: 12px 28px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .btn-secondary { background: var(--light-bg); color: var(--text-dark); }
+        .btn-secondary:hover:not(:disabled) { background: #e0e0e0; }
+        .btn-primary { background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: white; flex: 1; }
+        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .success-screen { text-align: center; padding: 60px 30px; }
+        .success-icon { font-size: 60px; margin-bottom: 20px; }
+        .success-screen h2 { font-size: 24px; color: var(--accent); margin-bottom: 15px; }
+        .success-screen p { color: var(--text-light); line-height: 1.6; margin-bottom: 10px; }
+        .step-indicator { display: flex; justify-content: center; gap: 8px; margin-bottom: 30px; flex-wrap: wrap; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); cursor: pointer; }
+        .dot.active { background: var(--primary); }
+        .dot.completed { background: var(--success); }
+        #submissionError { color: #d32f2f; padding: 16px; background: #ffebee; border-radius: 4px; margin-bottom: 16px; display: none; }
+        @media (max-width: 600px) {
+            .header { padding: 30px 20px; }
+            .header h1 { font-size: 22px; }
+            .form-content { padding: 25px 20px; }
+            .buttons { flex-direction: column; }
+            .btn-primary, .btn-secondary { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Tower</h1>
+            <p>AI Readiness &amp; Capabilities Assessment</p>
+            <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
+        </div>
+
+        <div class="form-content">
+            <div id="submissionError"></div>
+            <div class="step-indicator" id="stepIndicator"></div>
+            <div id="stepsContainer"></div>
+
+            <div class="buttons">
+                <button class="btn-secondary" id="prevBtn">← Back</button>
+                <button class="btn-primary" id="nextBtn">Next →</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ----- Injected by add_company.py -----
+        const COMPANY_SLUG = "tower";
+        const COMPANY_NAME = "Tower";
+        const WORKER_URL = "https://form-submission.inflownetwork.com";
+        const QUESTIONS = [{"id": "q1", "title": "Coding Agents Usage", "label": "How are AI-powered coding tools used in your engineering teams?", "context": "Coding agent adoption is the strongest leading indicator of how quickly a team can absorb broader AI capability.", "options": [{"value": 1, "label": "Not used", "context": "No team members use AI coding tools"}, {"value": 2, "label": "ChatGPT / Claude manually", "context": "Copy-paste prompts, no IDE integration"}, {"value": 3, "label": "IDE extensions", "context": "GitHub Copilot, Cursor, Codeium"}, {"value": 4, "label": "Terminal-based agents", "context": "Claude Code, Codex, Aider in workflow"}, {"value": 5, "label": "Custom internal agents", "context": "Self-built tools on top of LLM APIs"}]}, {"id": "q2", "title": "LLM Foundational Knowledge", "label": "What is your team's understanding of how LLMs actually work?", "context": "Foundational understanding determines whether the team can debug, evaluate, and choose the right model for a job.", "options": [{"value": 1, "label": "Beginner", "context": "Basic ChatGPT usage; no mental model"}, {"value": 2, "label": "Intermediate", "context": "Understand tokens, context windows, limitations"}, {"value": 3, "label": "Working knowledge", "context": "Comfortable with prompting patterns and tradeoffs"}, {"value": 4, "label": "Advanced", "context": "Embeddings, RAG, fine-tuning concepts understood"}, {"value": 5, "label": "Expert", "context": "Built and shipped production LLM systems"}]}, {"id": "q3", "title": "Automated LLM Usage", "label": "Do you use LLMs in background processes or only in interactive chat?", "context": "The shift from interactive to automated LLM use is where most of the ROI shows up.", "options": [{"value": 1, "label": "Manual only", "context": "All LLM use is human-in-the-loop chat"}, {"value": 2, "label": "Limited automation", "context": "POC or pilot of one batch job"}, {"value": 3, "label": "Some processes automated", "context": "A few production jobs run on a schedule"}, {"value": 4, "label": "Many processes automated", "context": "LLMs embedded across multiple workflows"}, {"value": 5, "label": "Fully systematized", "context": "Most repeatable cognitive work is LLM-mediated"}]}, {"id": "q4", "title": "MCP / Skills / Plugin Expertise", "label": "How comfortable is your team with custom tools, plugins, or MCP servers?", "context": "Tool/plugin authorship is where AI stops being a chat product and becomes infrastructure.", "options": [{"value": 1, "label": "Unfamiliar with the concept", "context": "Have not heard of MCP / plugins"}, {"value": 2, "label": "Aware but not using", "context": "Know it exists; have not tried"}, {"value": 3, "label": "Using off-the-shelf", "context": "Using public plugins and integrations"}, {"value": 4, "label": "Configured / customized", "context": "Tuned existing tools for our workflow"}, {"value": 5, "label": "Built our own", "context": "Authored MCP servers / skills in-house"}]}, {"id": "q5", "title": "Data Infrastructure", "label": "How mature is your data infrastructure for analytics and ML?", "context": "Data infrastructure is the floor for what AI work is even possible.", "options": [{"value": 1, "label": "No data warehouse", "context": "No structured data pipeline"}, {"value": 2, "label": "Basic logging", "context": "Limited ability to query for analytics"}, {"value": 3, "label": "Data warehouse exists", "context": "Analytics database with ETL for key datasets"}, {"value": 4, "label": "Comprehensive infrastructure", "context": "Automated pipelines, analytics tools in use"}, {"value": 5, "label": "ML-ready platform", "context": "Feature store, real-time processing, ML datasets"}]}, {"id": "q6", "title": "Team Capabilities", "label": "What is your team's current ML / data science / analytics experience?", "context": "Team expertise determines training needs, hiring urgency, and realistic timelines.", "options": [{"value": 1, "label": "No ML expertise", "context": "No team members with ML / DS background"}, {"value": 2, "label": "Basic analytics", "context": "1-2 people with SQL / Python / Excel skills"}, {"value": 3, "label": "Multiple data people", "context": "3+ with data background; basic ML familiarity"}, {"value": 4, "label": "Junior data scientist", "context": "Dedicated analyst or junior DS on team"}, {"value": 5, "label": "Experienced ML team", "context": "Production ML deployments under their belt"}]}, {"id": "q7", "title": "AI Strategy & Leadership", "label": "How committed is leadership to AI as a strategic priority?", "context": "Leadership commitment determines budget, headcount, and how patient the org will be with the J-curve.", "options": [{"value": 1, "label": "Not a priority", "context": "No budget or plan for AI initiatives"}, {"value": 2, "label": "Interest only", "context": "Curiosity, no formal strategy"}, {"value": 3, "label": "Early strategy", "context": "Budget allocated, strategy in development"}, {"value": 4, "label": "Clear roadmap", "context": "Dedicated resources and team ownership"}, {"value": 5, "label": "Central to strategy", "context": "Significant investment, C-level accountability"}]}, {"id": "q8", "title": "Process Automation Maturity", "label": "How much of your day-to-day work is already automated (any kind)?", "context": "Existing automation muscle predicts how fast AI automation can be layered on.", "options": [{"value": 1, "label": "Mostly manual", "context": "Few or no automated workflows"}, {"value": 2, "label": "Some scripts", "context": "Ad-hoc scripts run by individuals"}, {"value": 3, "label": "Standard SaaS automations", "context": "Zapier / n8n / Make in regular use"}, {"value": 4, "label": "Custom workflows", "context": "Internal tools and orchestration in production"}, {"value": 5, "label": "Automation-first culture", "context": "New process is automated by default"}]}];
+        // --------------------------------------
+
+        const TOTAL_STEPS = QUESTIONS.length + 2; // contact + N questions + success
+        const STORAGE_KEY = `ainext_assessment_${COMPANY_SLUG}`;
+        let currentStep = 1;
+        const responses = {};
+
+        function escapeHtml(s) {
+            return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
+
+        function renderSteps() {
+            const container = document.getElementById('stepsContainer');
+            const parts = [];
+
+            // Step 1: contact info
+            parts.push(`
+                <div class="step active" data-step="1">
+                    <div class="step-title"><span class="step-number">1</span><span>Your Contact Information</span></div>
+                    <div class="form-group">
+                        <label for="name">Full Name <span class="required">*</span></label>
+                        <input type="text" id="name" name="name" required placeholder="Your full name">
+                        <div class="error" id="nameError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address <span class="required">*</span></label>
+                        <input type="email" id="email" name="email" required placeholder="your.email@company.com">
+                        <div class="error" id="emailError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="department">Department <span class="required">*</span></label>
+                        <input type="text" id="department" name="department" required placeholder="e.g., Product, Engineering, Operations">
+                        <div class="error" id="departmentError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="role">Role / Title <span class="required">*</span></label>
+                        <input type="text" id="role" name="role" required placeholder="e.g., Product Manager, Engineer">
+                        <div class="error" id="roleError"></div>
+                    </div>
+                    <div class="context-box">
+                        <strong>What happens next:</strong> Your responses will help us understand ${escapeHtml(COMPANY_NAME)}'s AI maturity and create a customized roadmap.
+                    </div>
+                </div>
+            `);
+
+            // Steps 2..N+1: questions
+            QUESTIONS.forEach((q, idx) => {
+                const stepNum = idx + 2;
+                const optionsHtml = q.options.map((opt, i) => `
+                    <label class="radio-option">
+                        <input type="radio" name="${q.id}" value="${opt.value}"${i === 0 ? ' required' : ''}>
+                        <div class="option-text">
+                            <strong>${escapeHtml(opt.label)}</strong>
+                            ${opt.context ? `<span class="context">${escapeHtml(opt.context)}</span>` : ''}
+                        </div>
+                    </label>
+                `).join('');
+                parts.push(`
+                    <div class="step" data-step="${stepNum}">
+                        <div class="step-title"><span class="step-number">${stepNum}</span><span>${escapeHtml(q.title)}</span></div>
+                        <div class="form-group">
+                            <label>${escapeHtml(q.label)}</label>
+                            <div class="radio-group">${optionsHtml}</div>
+                            ${q.context ? `<div class="context-box"><strong>Why this matters:</strong> ${escapeHtml(q.context)}</div>` : ''}
+                        </div>
+                    </div>
+                `);
+            });
+
+            // Final: success screen
+            parts.push(`
+                <div class="step success-screen" data-step="${TOTAL_STEPS}">
+                    <div class="success-icon">✓</div>
+                    <h2>Thank You!</h2>
+                    <p>Your assessment responses have been received.</p>
+                    <p>We'll analyze your results and reach out within 2 business days.</p>
+                </div>
+            `);
+
+            container.innerHTML = parts.join('');
+        }
+
+        function renderStepIndicator() {
+            const ind = document.getElementById('stepIndicator');
+            ind.innerHTML = '';
+            for (let i = 1; i < TOTAL_STEPS; i++) {
+                const dot = document.createElement('div');
+                dot.className = `dot${i === 1 ? ' active' : ''}`;
+                dot.onclick = () => goToStep(i);
+                ind.appendChild(dot);
+            }
+        }
+
+        function saveCurrentInputs() {
+            document.querySelectorAll('input').forEach(input => {
+                if (input.type === 'radio') {
+                    if (input.checked) responses[input.name] = input.value;
+                } else {
+                    if (input.value) responses[input.name] = input.value;
+                }
+            });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(responses));
+        }
+
+        function restoreInputs() {
+            Object.keys(responses).forEach(key => {
+                const inputs = document.querySelectorAll(`[name="${key}"]`);
+                inputs.forEach(input => {
+                    if (input.type === 'radio') {
+                        if (input.value === responses[key]) input.checked = true;
+                    } else {
+                        input.value = responses[key];
+                    }
+                });
+            });
+        }
+
+        function changeStep(n) {
+            if (currentStep === 1 && n > 0 && !validateContactStep()) return;
+            saveCurrentInputs();
+            let next = currentStep + n;
+            if (next < 1) next = 1;
+            if (next > TOTAL_STEPS) next = TOTAL_STEPS;
+            goToStep(next);
+        }
+
+        function goToStep(n) {
+            if (n < 1 || n > TOTAL_STEPS) return;
+            saveCurrentInputs();
+            currentStep = n;
+            updateStepDisplay();
+        }
+
+        function updateStepDisplay() {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            const active = document.querySelector(`.step[data-step="${currentStep}"]`);
+            if (active) active.classList.add('active');
+
+            const progress = ((currentStep - 1) / (TOTAL_STEPS - 1)) * 100;
+            document.querySelector('.progress-fill').style.width = progress + '%';
+
+            document.querySelectorAll('.dot').forEach((dot, idx) => {
+                dot.classList.remove('active', 'completed');
+                if (idx + 1 < currentStep) dot.classList.add('completed');
+                else if (idx + 1 === currentStep) dot.classList.add('active');
+            });
+
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const isLastQuestion = currentStep === TOTAL_STEPS - 1;
+            const isSuccess = currentStep === TOTAL_STEPS;
+            prevBtn.style.display = currentStep === 1 || isSuccess ? 'none' : 'block';
+            nextBtn.style.display = isSuccess ? 'none' : 'block';
+            nextBtn.textContent = isLastQuestion ? 'Submit' : 'Next →';
+            nextBtn.onclick = isLastQuestion ? submitForm : () => changeStep(1);
+
+            restoreInputs();
+        }
+
+        function validateContactStep() {
+            const fields = ['name', 'email', 'department', 'role'];
+            let valid = true;
+            fields.forEach(f => {
+                const el = document.getElementById(f);
+                const err = document.getElementById(f + 'Error');
+                err.textContent = '';
+                if (!el.value.trim()) { err.textContent = `${f} is required`; valid = false; }
+                else if (f === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value)) {
+                    err.textContent = 'Valid email required'; valid = false;
+                }
+            });
+            return valid;
+        }
+
+        function calculateScore() {
+            const scores = QUESTIONS.map(q => parseInt(responses[q.id]) || 0);
+            const sum = scores.reduce((a, b) => a + b, 0);
+            return Math.round((sum / scores.length) * 10) / 10;
+        }
+
+        function getMaturityLevel(score) {
+            if (score >= 4.5) return 'Advanced';
+            if (score >= 3.5) return 'Intermediate';
+            if (score >= 2.5) return 'Developing';
+            if (score >= 1.5) return 'Beginner';
+            return 'Initial';
+        }
+
+        function submitForm() {
+            const submitBtn = document.getElementById('nextBtn');
+            submitBtn.disabled = true;
+            saveCurrentInputs();
+
+            const score = calculateScore();
+            const payload = {
+                company: COMPANY_SLUG,
+                name: responses.name,
+                email: responses.email,
+                department: responses.department,
+                role: responses.role,
+                questions: QUESTIONS.map(q => ({
+                    id: q.id,
+                    question: q.title,
+                    answer: responses[q.id],
+                    score: parseInt(responses[q.id]) || 0
+                })),
+                aiMaturityScore: score,
+                maturityLevel: getMaturityLevel(score)
+            };
+
+            fetch(WORKER_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(r => r.json().then(data => ({ ok: r.ok, data })))
+            .then(({ ok, data }) => {
+                if (ok && data.success) {
+                    localStorage.removeItem(STORAGE_KEY);
+                    goToStep(TOTAL_STEPS);
+                } else {
+                    showError('Failed to submit: ' + (data.error || 'Unknown error'));
+                    submitBtn.disabled = false;
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                showError('Network error. Please try again.');
+                submitBtn.disabled = false;
+            });
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('submissionError');
+            el.textContent = msg;
+            el.style.display = 'block';
+        }
+
+        function loadSaved() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) Object.assign(responses, JSON.parse(saved));
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSaved();
+            renderSteps();
+            renderStepIndicator();
+            updateStepDisplay();
+            document.getElementById('prevBtn').onclick = () => changeStep(-1);
+            document.getElementById('nextBtn').onclick = () => changeStep(1);
+        });
+    </script>
+</body>
+</html>
